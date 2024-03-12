@@ -1,12 +1,13 @@
 #include "King.h"
 
+extern int width, height;
+
 King::~King()
 {
     if (!king.IsNull())
     {
         king.Destroy();
     }
-
 }
 
 void King::Init()
@@ -14,14 +15,13 @@ void King::Init()
     pos = { 0, 0 };
 
     king.Load(L"Resource//King.png");
-
 }
 
 
 void King::Render(HDC hdc)
 {
 
-    king.Draw(hdc, pos.x, pos.y, WINDOW_WIDTH / 8, WINDOW_HEIGHT / 8 );
+    king.Draw(hdc, pos.x, pos.y, width / 8, height / 8 );
 
 }
 

@@ -8,6 +8,9 @@ HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
+RECT clientrect;
+int width, height;
+
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -75,6 +78,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, (HMENU)NULL, hInstance, NULL);
 
+    if (GetClientRect(hWnd, &clientrect)) {
+        width = clientrect.right - clientrect.left;
+        height = clientrect.bottom - clientrect.top;
+    }
+
     if (!hWnd)
     {
         return FALSE;
@@ -130,16 +138,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (wParam)
         {
             case VK_LEFT:
-                king.Move(-WINDOW_WIDTH/8, 0);
+                king.Move(-width/8, 0);
                 break;
             case VK_RIGHT:
-                king.Move(WINDOW_WIDTH / 8, 0);
+                king.Move(width / 8, 0);
                 break;
             case VK_UP:
-                king.Move(0, -(WINDOW_HEIGHT / 8 - 5));
+                king.Move(0, -height / 8);
                 break;
             case VK_DOWN:
-                king.Move(0, WINDOW_HEIGHT / 8 - 5);
+                king.Move(0, height / 8);
                 break;
             case VK_ESCAPE:
                 //메모리 해제

@@ -1,5 +1,7 @@
 #include "ChessBoard.h"
 
+extern int width, height;
+
 ChessBoard::~ChessBoard() 
 {
     if (!chessboard.IsNull())
@@ -11,11 +13,11 @@ ChessBoard::~ChessBoard()
 
 void ChessBoard::Init()
 {
-    chessboard.Load(L"Resource//ChessBoard.bmp");
+    chessboard.Load(L"Resource//ChessBoard.png");
 
 }
 
 void ChessBoard::Render(HDC hdc)
 {
-    chessboard.Draw(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    chessboard.Draw(hdc, 0, 0, width, height);
 }
