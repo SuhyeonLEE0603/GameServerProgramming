@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServerProject", "GameSe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project1", "실습\Project1\Project1.vcxproj", "{CB0225D2-B8E0-4B35-B163-E33899EE0939}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "..\Server\Server.vcxproj", "{E3DB85B8-7C22-4475-BF63-EEA6EC055757}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "Server\Server.vcxproj", "{E3DB85B8-7C22-4475-BF63-EEA6EC055757}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
