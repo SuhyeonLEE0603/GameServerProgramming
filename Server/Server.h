@@ -8,6 +8,7 @@ class Server
 {
 public:
 	//vector<SOCKET> m_clients_socket;
+	char buf[BUFSIZE];
 
 	Server();
 	void Init();
@@ -24,7 +25,6 @@ private:
 	SOCKET m_server_socket;
 	SOCKET m_client_socket;
 	SOCKADDR_IN m_server_addr;
-	DWORD recv_byte;
 
 };
 

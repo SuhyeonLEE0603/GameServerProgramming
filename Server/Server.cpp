@@ -67,7 +67,7 @@ void Server::Accept()
 DWORD Server::Send()
 {
     DWORD send_byte;
-    wsabuf[0].len = recv_byte;
+    wsabuf[0].len = sizeof(Pos);
 
     int res = WSASend(m_client_socket, &wsabuf[0], 1, &send_byte, 0, 0, 0);
 
@@ -80,12 +80,12 @@ DWORD Server::Send()
 
 DWORD Server::Recv()
 {
-    char buf[BUFSIZE];
     wsabuf[0].buf = buf;
-    wsabuf[0].len = BUFSIZE;
+    wsabuf[0].len = sizeof(char);
 
     DWORD recv_flag = 0;
-    
+    DWORD recv_byte;
+
 	int res = WSARecv(m_client_socket, wsabuf, 1, &recv_byte, &recv_flag, nullptr, nullptr);
     if (0 != res) {
         error_display("WSARecv", WSAGetLastError());
