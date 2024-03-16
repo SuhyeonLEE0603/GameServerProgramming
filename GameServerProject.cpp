@@ -24,10 +24,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_GAMESERVERPROJECT, szWindowClass, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDC_GAMEClientPROJECT, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAMESERVERPROJECT));
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAMEClientPROJECT));
 
     MSG msg;
 
@@ -35,8 +35,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
-
-
 
     while (GetMessage(&msg, nullptr, 0, 0))
     {
@@ -61,7 +59,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAMESERVERPROJECT));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAMEClientPROJECT));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = NULL;
@@ -106,6 +104,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static HDC hdcBuffer; // 백 버퍼용 HDC
     static HBITMAP hBitmap;
     static HBITMAP hOldBitmap;
+
+
 
     switch (message)
     {

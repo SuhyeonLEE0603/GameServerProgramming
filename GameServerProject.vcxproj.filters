@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="헤더 파일">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
@@ -13,11 +9,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\Object">
+    <Filter Include="Object">
       <UniqueIdentifier>{d70a64ad-c672-4d3c-9cb4-e86aed9b45cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Scene">
+    <Filter Include="Scene">
       <UniqueIdentifier>{56996761-9e12-41f9-bcf9-11c7b1cfe365}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client">
+      <UniqueIdentifier>{da893916-923c-4e1e-b66f-ef7baa9fb95c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -28,7 +27,7 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="King.h">
-      <Filter>소스 파일\Object</Filter>
+      <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Types.h">
       <Filter>헤더 파일</Filter>
@@ -37,16 +36,22 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ChessBoard.h">
-      <Filter>소스 파일\Scene</Filter>
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Server\Client.h">
+      <Filter>Client</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="King.cpp">
-      <Filter>소스 파일\Object</Filter>
+      <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="GameServerProject.cpp" />
     <ClCompile Include="ChessBoard.cpp">
-      <Filter>소스 파일\Scene</Filter>
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Server\Client.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

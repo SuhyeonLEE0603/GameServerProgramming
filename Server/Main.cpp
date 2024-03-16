@@ -15,5 +15,17 @@ int main()
 
 		recv_byte = server.Recv();
 
+		if (server.buf[0] == VK_LEFT) {
+
+		}
+		else if (server.buf[0] == VK_RIGHT) {
+
+		}
+		else if (server.buf[0] == VK_UP) {
+
+		}
+		else if (server.buf[0] == VK_DOWN) {
+
+		}
 	}
 }
