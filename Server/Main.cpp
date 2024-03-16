@@ -3,18 +3,17 @@
 
 int main()
 {
-	cout << "SERVER START" << endl;
+	std::cout << "SERVER START" << std::endl;
 
 	Server server;
+	DWORD recv_byte{};
+
 	server.Init();
-	
-	SOCKET player_socket;
+	server.Accept();
 
 	while (1) {
 
-		if (server.Accept()) {
-
-		}
+		recv_byte = server.Recv();
 
 	}
 }
