@@ -23,7 +23,7 @@ Server::Server()
         exit(1);
     }
 
-    m_s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
+    m_s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 
     if (m_s_socket == INVALID_SOCKET) {
         exit(1);
@@ -70,7 +70,7 @@ bool Server::Accept()
 
 DWORD Server::Send(SOCKET client_socket)
 {
-    WSABUF buf;     // 좌표 보낼 버퍼
+    WSABUF buf{};     // 좌표 보낼 버퍼
     DWORD send_byte;
 
     WSASend(client_socket, &buf, 1, &send_byte, 0, 0, 0);
@@ -79,7 +79,7 @@ DWORD Server::Send(SOCKET client_socket)
 
 DWORD Server::Recv(SOCKET client_socket)
 {
-    WSABUF buf;     // 키 입력 받을 버퍼
+    WSABUF buf{};     // 키 입력 받을 버퍼
     DWORD recv_byte;
     DWORD recv_flag = 0;
     
@@ -92,5 +92,9 @@ DWORD Server::Recv(SOCKET client_socket)
 
 Server::~Server()
 {
+    if (!closesocket(m_s_socket))
+    {
+        cout << "Server Close" << endl;
+    }
     WSACleanup();
 }
