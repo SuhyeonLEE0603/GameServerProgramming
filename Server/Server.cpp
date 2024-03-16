@@ -37,7 +37,7 @@ Server::Server()
     setsockopt(m_server_socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&optval, sizeof(optval));
 
     m_server_addr.sin_family = AF_INET;
-    m_server_addr.sin_port = htons(PORT);
+    m_server_addr.sin_port = PORT;
     m_server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 }
 

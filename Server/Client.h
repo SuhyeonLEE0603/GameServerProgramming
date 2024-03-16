@@ -12,7 +12,6 @@ public:
 
 	Client();
 	void Init();
-	void Accept();
 	DWORD Send();
 	DWORD Recv();
 	~Client();
@@ -24,8 +23,8 @@ private:
 
 	int m_player_num;
 	WSADATA m_wsa;
-	SOCKET m_client_socket;
-	SOCKADDR_IN m_client_addr;
+	SOCKET m_server_socket;
+	SOCKADDR_IN m_server_addr;
 	DWORD recv_byte;
 
 };

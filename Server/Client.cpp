@@ -25,47 +25,31 @@ Client::Client()
         error_display("WSAStartup", WSAGetLastError());
     }
 
-    m_client_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, 0);
+    m_server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, 0);
 
-    if (m_client_socket == INVALID_SOCKET) {
+    if (m_server_socket == INVALID_SOCKET) {
         error_display("WSASocket", WSAGetLastError());
     }
 
-    m_client_addr.sin_family = AF_INET;
-    m_client_addr.sin_port = PORT;
-    inet_pton(AF_INET, SERVER_ADDR, &m_client_addr.sin_addr);
-
+    m_server_addr.sin_family = AF_INET;
+    m_server_addr.sin_port = PORT;
+    inet_pton(AF_INET, SERVER_ADDR, &m_server_addr.sin_addr);
 }
 
 void Client::Init()
 {
-    if (bind(m_client_socket, reinterpret_cast<sockaddr*>(& m_client_addr), sizeof(m_client_addr)) == SOCKET_ERROR) {
-        error_display("bind", WSAGetLastError());
-    }
-
-    if (listen(m_client_socket, SOMAXCONN) == SOCKET_ERROR) {
-        error_display("listen", WSAGetLastError());
-    }
-
-}
-
-void Client::Accept()
-{
-    int addr_size = sizeof(m_client_addr);
-
-    m_client_socket = WSAAccept(m_client_socket, reinterpret_cast<sockaddr*>(&m_client_addr), &addr_size, NULL, NULL);
-
-    if (m_client_socket == SOCKET_ERROR) {
-        error_display("WSAAccept", WSAGetLastError());
+    if (WSAConnect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_socket), sizeof(m_server_socket), nullptr, nullptr, nullptr, nullptr) != 0) {
+        error_display("WSAConnect", WSAGetLastError());
     }
 }
 
 DWORD Client::Send()
 {
     DWORD send_byte;
-    wsabuf[0].len = recv_byte;
+    wsabuf[0].buf = buf;
+    wsabuf[0].len = sizeof(char);
 
-    int res = WSASend(m_client_socket, &wsabuf[0], 1, &send_byte, 0, 0, 0);
+    int res = WSASend(m_server_socket, &wsabuf[0], 1, &send_byte, 0, 0, 0);
 
     if (0 != res) {
         error_display("WSASend", WSAGetLastError());
@@ -77,11 +61,11 @@ DWORD Client::Send()
 DWORD Client::Recv()
 {
     wsabuf[0].buf = buf;
-    wsabuf[0].len = BUFSIZE;
+    wsabuf[0].len = sizeof(Pos);
 
     DWORD recv_flag = 0;
     
-	int res = WSARecv(m_client_socket, wsabuf, 1, &recv_byte, &recv_flag, nullptr, nullptr);
+	int res = WSARecv(m_server_socket, wsabuf, 1, &recv_byte, &recv_flag, nullptr, nullptr);
     if (0 != res) {
         error_display("WSARecv", WSAGetLastError());
     }
@@ -92,7 +76,6 @@ DWORD Client::Recv()
 Client::~Client()
 {
     std::cout << "Client Close" << std::endl;
-    closesocket(m_client_socket);
-    closesocket(m_client_socket);
+    closesocket(m_server_socket);
     WSACleanup();
 }
