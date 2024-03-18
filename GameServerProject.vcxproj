@@ -128,8 +128,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ChessBoard.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="King.h" />
-    <ClInclude Include="Server\Client.h" />
     <ClInclude Include="Server\Packet.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
@@ -138,9 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChessBoard.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="GameServerProject.cpp" />
     <ClCompile Include="King.cpp" />
-    <ClCompile Include="Server\Client.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameServerProject.rc" />

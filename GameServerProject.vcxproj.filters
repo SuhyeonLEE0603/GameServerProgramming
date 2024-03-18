@@ -38,11 +38,11 @@
     <ClInclude Include="ChessBoard.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Server\Client.h">
-      <Filter>Client</Filter>
-    </ClInclude>
     <ClInclude Include="Server\Packet.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>Client</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -53,7 +53,7 @@
     <ClCompile Include="ChessBoard.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Server\Client.cpp">
+    <ClCompile Include="Client.cpp">
       <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>

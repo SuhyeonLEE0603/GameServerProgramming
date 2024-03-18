@@ -38,7 +38,7 @@ Client::Client()
 
 void Client::Init()
 {
-    if (WSAConnect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_socket), sizeof(m_server_socket), nullptr, nullptr, nullptr, nullptr) != 0) {
+    if (!WSAConnect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_socket), sizeof(m_server_socket), nullptr, nullptr, nullptr, nullptr)) {
         error_display("WSAConnect", WSAGetLastError());
     }
 }
