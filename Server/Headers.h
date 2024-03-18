@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include "Player.h"
 
 struct Pos {
 	int x{};

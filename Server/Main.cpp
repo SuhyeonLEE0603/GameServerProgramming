@@ -7,6 +7,7 @@ int main()
 
 	Server server;
 	DWORD recv_byte{};
+	Player player;
 
 	server.Init();
 	server.Accept();
@@ -16,10 +17,10 @@ int main()
 		recv_byte = server.Recv();
 
 		if (server.buf[0] == VK_LEFT) {
-
+			player.Move();
 		}
 		else if (server.buf[0] == VK_RIGHT) {
-
+			
 		}
 		else if (server.buf[0] == VK_UP) {
 
