@@ -9,6 +9,8 @@ HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
+
+Client client_s;
 RECT clientrect;
 int width, height;
 
@@ -20,12 +22,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
-{
-    static Client client_s;
-
-    if (!client_s.Init()) {
-        exit(1);
-    }
+{  
 
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -82,11 +79,24 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, (HMENU)NULL, hInstance, NULL);
-
+    
+    if (!client_s.Init()) {
+        MessageBox(hWnd, L"CANNOT CONNECT SERVER", L"CONNECT ERROR", 0);
+        exit(1);
+    }
+    
     if (GetClientRect(hWnd, &clientrect)) {
         width = clientrect.right - clientrect.left;
         height = clientrect.bottom - clientrect.top;
     }
+
+    PacketType packet = WindowSize;
+    PacketWindowSize windowsize;
+
+    windowsize.width = width;
+    windowsize.height = height;
+    
+    client_s.Send(packet, (void*)&windowsize);
 
     if (!hWnd)
     {
@@ -112,7 +122,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static HBITMAP hBitmap;
     static HBITMAP hOldBitmap;
 
-
+    static int x, y;
 
     switch (message)
     {
@@ -132,6 +142,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             hdc = BeginPaint(hWnd, &ps);
 
+            king.Update(x, y);
             chessboard.Render(hdcBuffer);
             king.Render(hdcBuffer);
 
@@ -142,19 +153,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_KEYDOWN:
+        PacketType packet_type;
+        packet_type = KeyInput;
+        PacketKeyInput ki;
+
         switch (wParam)
         {
             case VK_LEFT:
-                king.Move(-width/8, 0);
+                ki.key = VK_LEFT;
                 break;
             case VK_RIGHT:
-                king.Move(width / 8, 0);
+                ki.key = VK_RIGHT;
                 break;
             case VK_UP:
-                king.Move(0, -height / 8);
+                ki.key = VK_UP;
                 break;
             case VK_DOWN:
-                king.Move(0, height / 8);
+                ki.key = VK_DOWN;
                 break;
             case VK_ESCAPE:
                 //메모리 해제
@@ -165,9 +180,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ReleaseDC(hWnd, hdc);
                 PostQuitMessage(0);
                 break;
-            }
-            InvalidateRect(hWnd, NULL, FALSE);
-            break;
+        }
+        client_s.Send(packet_type, (void*)&ki);
+        client_s.Recv();
+
+        x = *reinterpret_cast<int*>(&client_s.buf[0]);
+        y = *reinterpret_cast<int*>(&client_s.buf[4]);
+
+        InvalidateRect(hWnd, NULL, FALSE);
+        break;
     case WM_DESTROY:
         //메모리 해제
         SelectObject(hdcBuffer, hOldBitmap);

@@ -21,15 +21,16 @@ Server::Server()
 
     std::wcout.imbue(std::locale("korean"));
 
-    if (WSAStartup(MAKEWORD(2, 0), &m_wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &m_wsa) != 0) {
         error_display("WSAStartup", WSAGetLastError());
-
+        closesocket(m_client_socket);
     }
 
     m_server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, 0);
 
     if (m_server_socket == INVALID_SOCKET) {
         error_display("WSASocket", WSAGetLastError());
+        closesocket(m_client_socket);
     }
 
     m_server_addr.sin_family = AF_INET;
@@ -41,10 +42,12 @@ void Server::Init()
 {
     if (bind(m_server_socket, reinterpret_cast<sockaddr*>(& m_server_addr), sizeof(m_server_addr)) == SOCKET_ERROR) {
         error_display("bind", WSAGetLastError());
+        closesocket(m_client_socket);
     }
 
     if (listen(m_server_socket, SOMAXCONN) == SOCKET_ERROR) {
         error_display("listen", WSAGetLastError());
+        closesocket(m_client_socket);
     }
 
 }
@@ -57,6 +60,7 @@ void Server::Accept()
 
     if (m_client_socket == SOCKET_ERROR) {
         error_display("WSAAccept", WSAGetLastError());
+        closesocket(m_client_socket);
     }
     std::cout << "Client Accepted" << std::endl;
     
@@ -65,31 +69,60 @@ void Server::Accept()
 DWORD Server::Send(PacketType pt, void* packet)
 {
     DWORD send_byte;
-    wsabuf[0].len = sizeof(Pos);
+    wsabuf[0].buf = reinterpret_cast<char*>(&pt);
+    wsabuf[0].len = sizeof(pt);
+    wsabuf[1].buf = reinterpret_cast<char*>(packet);
+    wsabuf[1].len = packet_size[pt];
 
-    int res = WSASend(m_client_socket, &wsabuf[0], 1, &send_byte, 0, 0, 0);
-
+    int res = WSASend(m_client_socket, wsabuf, 2, &send_byte, 0, 0, 0);
+    
     if (0 != res) {
         error_display("WSASend", WSAGetLastError());
+        closesocket(m_client_socket);
     }
 
 	return send_byte;
 }
 
-DWORD Server::Recv()
+PacketType Server::Recv()
 {
-    wsabuf[0].buf = buf;
-    wsabuf[0].len = sizeof(char);
+    PacketType pt{};
+    wsabuf[0].buf = reinterpret_cast<char*>(&pt);
+    wsabuf[0].len = sizeof(pt);
 
     DWORD recv_flag = 0;
     DWORD recv_byte;
 
-	int res = WSARecv(m_client_socket, wsabuf, 1, &recv_byte, &recv_flag, nullptr, nullptr);
-    if (0 != res) {
+	int res = WSARecv(m_client_socket, &wsabuf[0], 1, &recv_byte, &recv_flag, nullptr, nullptr);
+    if (SOCKET_ERROR == res) {
         error_display("WSARecv", WSAGetLastError());
+        closesocket(m_client_socket);
     }
 
-    return recv_byte;
+    wsabuf[1].buf = buf;
+    wsabuf[1].len = packet_size[pt];
+
+
+    res = WSARecv(m_client_socket, &wsabuf[1], 1, &recv_byte, &recv_flag, nullptr, nullptr);
+    if (SOCKET_ERROR == res) {
+        error_display("WSARecv", WSAGetLastError());
+        closesocket(m_client_socket);
+    }
+
+    return pt;
+}
+
+SOCKET Server::GetClientSocket()
+{
+    return m_client_socket;
+}
+
+void Server::CloseServer()
+{
+    std::cout << "Server Close" << std::endl;
+    closesocket(m_server_socket);
+    closesocket(m_client_socket);
+    WSACleanup();
 }
 
 Server::~Server()

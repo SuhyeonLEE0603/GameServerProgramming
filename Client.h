@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Packet.h"
 
 constexpr short PORT = 4000;
 constexpr int BUFSIZE = 256;
@@ -12,19 +13,20 @@ public:
 
 	Client();
 	bool Init();
-	DWORD Send();
-	DWORD Recv();
+	DWORD Send(PacketType pt, void* packet);
+	PacketType Recv();
+	SOCKET GetServerSocket();
+	void CloseClient();
 	~Client();
 
 	char buf[BUFSIZE];
 
 private:
-	WSABUF wsabuf[1];
+	WSABUF wsabuf[2];
 
 	WSADATA m_wsa;
 	SOCKET m_server_socket;
 	SOCKADDR_IN m_server_addr;
-	DWORD recv_byte;
 
 };
 

@@ -3,12 +3,10 @@
 
 class Player
 {
-private:
-    int x;
-    int y;
-
 public:
-    Player() :x{}, y{} {};
-    void Move(int dx, int dy);
+    Pos pos;
+
+    void Move(int, int);
+    Pos GetPos();
 };
 

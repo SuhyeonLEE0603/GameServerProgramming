@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 
-
 class King {
 private:
     CImage king;
@@ -12,10 +11,9 @@ public:
     ~King();
 
     void Init();
-
-    void Render(HDC hdc);
-
-    void Move(int dx, int dy);
+    void Render(HDC);
+    void Update(int, int);
+    //void Move(int dx, int dy);
 
     
 };

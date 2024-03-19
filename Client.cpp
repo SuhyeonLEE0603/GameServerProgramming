@@ -19,14 +19,16 @@ Client::Client()
 {
     std::wcout.imbue(std::locale("korean"));
 
-    if (WSAStartup(MAKEWORD(2, 0), &m_wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &m_wsa) != 0) {
         error_display("WSAStartup", WSAGetLastError());
+        closesocket(m_server_socket);
     }
 
     m_server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, 0);
 
     if (m_server_socket == INVALID_SOCKET) {
         error_display("WSASocket", WSAGetLastError());
+        closesocket(m_server_socket);
     }
 
     m_server_addr.sin_family = AF_INET;
@@ -39,39 +41,58 @@ bool Client::Init()
     return SOCKET_ERROR != connect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), sizeof(m_server_addr));
 }
 
-DWORD Client::Send()
+DWORD Client::Send(PacketType pt, void* packet)
 {
     DWORD send_byte;
-    wsabuf[0].buf = buf;
-    wsabuf[0].len = sizeof(char);
+    wsabuf[0].buf = reinterpret_cast<char*>(&pt);
+    wsabuf[0].len = sizeof(pt);
+    wsabuf[1].buf = reinterpret_cast<char*>(packet);
+    wsabuf[1].len = packet_size[pt];
 
-    int res = WSASend(m_server_socket, &wsabuf[0], 1, &send_byte, 0, 0, 0);
+    int res = WSASend(m_server_socket, wsabuf, 2, &send_byte, 0, 0, 0);
 
     if (0 != res) {
         error_display("WSASend", WSAGetLastError());
+        closesocket(m_server_socket);
     }
 
 	return send_byte;
 }
 
-DWORD Client::Recv()
+PacketType Client::Recv()
 {
-    wsabuf[0].buf = buf;
-    wsabuf[0].len = sizeof(Pos);
+    PacketType pt{};
+    wsabuf[0].buf = reinterpret_cast<char*>(&pt);
+    wsabuf[0].len = sizeof(pt);
 
     DWORD recv_flag = 0;
-    
-	int res = WSARecv(m_server_socket, wsabuf, 1, &recv_byte, &recv_flag, nullptr, nullptr);
+    DWORD recv_byte;
+
+	int res = WSARecv(m_server_socket, &wsabuf[0], 1, &recv_byte, &recv_flag, nullptr, nullptr);
     if (0 != res) {
         error_display("WSARecv", WSAGetLastError());
+        closesocket(m_server_socket);
     }
 
-    return recv_byte;
+    wsabuf[1].buf = buf;
+    wsabuf[1].len = packet_size[pt];
+
+    res = WSARecv(m_server_socket, &wsabuf[1], 1, &recv_byte, &recv_flag, nullptr, nullptr);
+    if (0 != res) {
+        error_display("WSARecv", WSAGetLastError());
+        closesocket(m_server_socket);
+    }
+
+    return pt;
+}
+
+SOCKET Client::GetServerSocket()
+{
+    return m_server_socket;
 }
 
 Client::~Client()
 {
-    std::cout << "Client Close" << std::endl;
     closesocket(m_server_socket);
     WSACleanup();
 }

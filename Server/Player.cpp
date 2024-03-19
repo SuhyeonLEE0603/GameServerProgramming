@@ -2,10 +2,15 @@
 
 void Player::Move(int dx, int dy)
 {
-    if (x + dx < 0 || x + dx > 1100
-        || y + dy < 0 || y + dy > 1000) {
+    if (pos.x + dx < 0 || pos.x + dx > 1100
+        || pos.y + dy < 0 || pos.y + dy > 1000) {
         return;
     }
-    x += dx;
-    y += dy;
+    pos.x += dx;
+    pos.y += dy;
+}
+
+Pos Player::GetPos()
+{
+    return pos;
 }

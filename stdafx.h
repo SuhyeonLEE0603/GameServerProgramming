@@ -14,6 +14,7 @@
 #include "Types.h"
 #include <vector>
 #include <iostream>
+#include <string>
 #include "atlImage.h"
 
 #define WINDOW_WIDTH 1200

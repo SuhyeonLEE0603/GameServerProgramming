@@ -15,11 +15,13 @@ public:
 	void Init();
 	void Accept();
 	DWORD Send(PacketType pt, void* packet);
-	DWORD Recv();
+	PacketType Recv();
+	SOCKET GetClientSocket();
+	void CloseServer();
 	~Server();
 
 private:
-	WSABUF wsabuf[1];
+	WSABUF wsabuf[2];
 
 	int m_player_num;
 	WSADATA m_wsa;
