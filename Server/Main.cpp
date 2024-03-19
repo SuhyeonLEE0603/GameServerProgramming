@@ -17,7 +17,7 @@ int main()
 		recv_byte = server.Recv();
 
 		if (server.buf[0] == VK_LEFT) {
-			player.Move();
+			//player.Move();
 		}
 		else if (server.buf[0] == VK_RIGHT) {
 			

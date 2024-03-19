@@ -17,11 +17,9 @@ void error_display(const char* msg, int err_no)
 
 Client::Client()
 {
-    m_player_num = 0;
-
     std::wcout.imbue(std::locale("korean"));
 
-    if (WSAStartup(MAKEWORD(2, 2), &m_wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 0), &m_wsa) != 0) {
         error_display("WSAStartup", WSAGetLastError());
     }
 
@@ -36,11 +34,9 @@ Client::Client()
     inet_pton(AF_INET, SERVER_ADDR, &m_server_addr.sin_addr);
 }
 
-void Client::Init()
+bool Client::Init()
 {
-    if (!WSAConnect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_socket), sizeof(m_server_socket), nullptr, nullptr, nullptr, nullptr)) {
-        error_display("WSAConnect", WSAGetLastError());
-    }
+    return SOCKET_ERROR != connect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), sizeof(m_server_addr));
 }
 
 DWORD Client::Send()

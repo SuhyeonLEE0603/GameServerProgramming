@@ -21,7 +21,7 @@ Server::Server()
 
     std::wcout.imbue(std::locale("korean"));
 
-    if (WSAStartup(MAKEWORD(2, 2), &m_wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 0), &m_wsa) != 0) {
         error_display("WSAStartup", WSAGetLastError());
 
     }
@@ -31,10 +31,6 @@ Server::Server()
     if (m_server_socket == INVALID_SOCKET) {
         error_display("WSASocket", WSAGetLastError());
     }
-
-    DWORD optval = 1;
-
-    setsockopt(m_server_socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&optval, sizeof(optval));
 
     m_server_addr.sin_family = AF_INET;
     m_server_addr.sin_port = PORT;
@@ -57,14 +53,16 @@ void Server::Accept()
 {
     int addr_size = sizeof(m_server_addr);
 
-    m_server_socket = WSAAccept(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), &addr_size, NULL, NULL);
+    m_client_socket = WSAAccept(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), &addr_size, NULL, NULL);
 
-    if (m_server_socket == SOCKET_ERROR) {
+    if (m_client_socket == SOCKET_ERROR) {
         error_display("WSAAccept", WSAGetLastError());
     }
+    std::cout << "Client Accepted" << std::endl;
+    
 }
 
-DWORD Server::Send()
+DWORD Server::Send(PacketType pt, void* packet)
 {
     DWORD send_byte;
     wsabuf[0].len = sizeof(Pos);

@@ -4,10 +4,11 @@
 class Player
 {
 private:
-    Pos pos;
+    int x;
+    int y;
 
 public:
-    Player() :pos(0, 0) {};
+    Player() :x{}, y{} {};
     void Move(int dx, int dy);
 };
 

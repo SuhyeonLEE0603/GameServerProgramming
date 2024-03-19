@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "King.h"
 #include "ChessBoard.h"
-
+#include "Client.h"
 
 #define MAX_LOADSTRING 100
 
@@ -12,7 +12,6 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름�
 RECT clientrect;
 int width, height;
 
-
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -22,6 +21,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    static Client client_s;
+
+    if (!client_s.Init()) {
+        exit(1);
+    }
+
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 

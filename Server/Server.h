@@ -1,5 +1,6 @@
 #pragma once
 #include "Headers.h"
+#include "Packet.h"
 
 constexpr short PORT = 4000;
 constexpr int BUFSIZE = 256;
@@ -13,7 +14,7 @@ public:
 	Server();
 	void Init();
 	void Accept();
-	DWORD Send();
+	DWORD Send(PacketType pt, void* packet);
 	DWORD Recv();
 	~Server();
 
