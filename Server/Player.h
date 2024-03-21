@@ -7,6 +7,5 @@ public:
     Pos pos;
 
     void Move(int, int);
-    Pos GetPos();
 };
 

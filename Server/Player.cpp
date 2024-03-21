@@ -9,8 +9,3 @@ void Player::Move(int dx, int dy)
     pos.x += dx;
     pos.y += dy;
 }
-
-Pos Player::GetPos()
-{
-    return pos;
-}

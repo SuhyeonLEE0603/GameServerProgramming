@@ -7,7 +7,6 @@ int main()
 	std::cout << "SERVER START" << std::endl;
 
 	Server server;
-	PacketType packet_type;
 	Player player;
 
 	server.Init();
@@ -15,24 +14,23 @@ int main()
 	
 	int x;
 	int y;
+	int recv_size;
 
 	while (1) {
 
-		if (server.GetClientSocket() == SOCKET_ERROR) {
-			server.CloseServer();
+		recv_size = server.Recv();
+		if (recv_size == 0) {
 			break;
 		}
 
-		packet_type = server.Recv();
-
-		if (packet_type == WindowSize) {
+		if (server.pt == WindowSize) {
 
 			x = *reinterpret_cast<int*>(&server.buf[0]);
 			y = *reinterpret_cast<int*>(&server.buf[4]);
 
 			std::cout << "Recv WindowSize : " << x << ", " << y << std::endl;
 		}
-		else if (packet_type == KeyInput) {
+		else if (server.pt == KeyInput) {
 			PacketKeyInput key;
 			key.key = server.buf[0];
 
@@ -64,4 +62,6 @@ int main()
 			server.Send(packet, (void*)&pos);
 		}
 	}
+
+	std::cout << "Client Close" << std::endl;
 }

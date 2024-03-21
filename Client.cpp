@@ -86,11 +86,6 @@ PacketType Client::Recv()
     return pt;
 }
 
-SOCKET Client::GetServerSocket()
-{
-    return m_server_socket;
-}
-
 Client::~Client()
 {
     closesocket(m_server_socket);

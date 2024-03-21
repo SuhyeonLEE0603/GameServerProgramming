@@ -15,8 +15,6 @@ public:
 	bool Init();
 	DWORD Send(PacketType pt, void* packet);
 	PacketType Recv();
-	SOCKET GetServerSocket();
-	void CloseClient();
 	~Client();
 
 	char buf[BUFSIZE];

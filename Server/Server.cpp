@@ -84,9 +84,8 @@ DWORD Server::Send(PacketType pt, void* packet)
 	return send_byte;
 }
 
-PacketType Server::Recv()
+DWORD Server::Recv()
 {
-    PacketType pt{};
     wsabuf[0].buf = reinterpret_cast<char*>(&pt);
     wsabuf[0].len = sizeof(pt);
 
@@ -94,7 +93,7 @@ PacketType Server::Recv()
     DWORD recv_byte;
 
 	int res = WSARecv(m_client_socket, &wsabuf[0], 1, &recv_byte, &recv_flag, nullptr, nullptr);
-    if (SOCKET_ERROR == res) {
+    if (0 != res) {
         error_display("WSARecv", WSAGetLastError());
         closesocket(m_client_socket);
     }
@@ -104,25 +103,12 @@ PacketType Server::Recv()
 
 
     res = WSARecv(m_client_socket, &wsabuf[1], 1, &recv_byte, &recv_flag, nullptr, nullptr);
-    if (SOCKET_ERROR == res) {
+    if (0 != res) {
         error_display("WSARecv", WSAGetLastError());
         closesocket(m_client_socket);
     }
 
-    return pt;
-}
-
-SOCKET Server::GetClientSocket()
-{
-    return m_client_socket;
-}
-
-void Server::CloseServer()
-{
-    std::cout << "Server Close" << std::endl;
-    closesocket(m_server_socket);
-    closesocket(m_client_socket);
-    WSACleanup();
+    return recv_byte;
 }
 
 Server::~Server()

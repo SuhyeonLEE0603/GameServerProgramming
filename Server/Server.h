@@ -10,14 +10,13 @@ class Server
 public:
 	//vector<SOCKET> m_clients_socket;
 	char buf[BUFSIZE];
+	PacketType pt{};
 
 	Server();
 	void Init();
 	void Accept();
 	DWORD Send(PacketType pt, void* packet);
-	PacketType Recv();
-	SOCKET GetClientSocket();
-	void CloseServer();
+	DWORD Recv();
 	~Server();
 
 private:
