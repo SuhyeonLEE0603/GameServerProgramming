@@ -9,22 +9,28 @@ constexpr char SERVER_ADDR[] = "127.0.0.1";
 class Client
 {
 public:
-	//vector<SOCKET> m_clients_socket;
-
 	Client();
 	bool Init();
-	DWORD Send(PacketType pt, void* packet);
-	PacketType Recv();
+	void Send(PacketType pt, void* packet);
+	void SetRecv();
+	errno_t KeyProcess(WPARAM&);
+	SOCKET& GetSock();
+	WSAOVERLAPPED& GetOver();
+	WSABUF& GetWSABuf();
 	~Client();
 
 	char buf[BUFSIZE];
 
 private:
-	WSABUF wsabuf[2];
+	PacketType pt{};
 
+	WSAOVERLAPPED m_wsaover;
+	WSABUF wsabuf[2];
 	WSADATA m_wsa;
 	SOCKET m_server_socket;
 	SOCKADDR_IN m_server_addr;
 
 };
 
+extern Client g_client_s;
+extern int g_x, g_y;

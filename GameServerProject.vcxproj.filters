@@ -44,6 +44,9 @@
     <ClInclude Include="Client.h">
       <Filter>Client</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="King.cpp">
@@ -55,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="Client.cpp">
       <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

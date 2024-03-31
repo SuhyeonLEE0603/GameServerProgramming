@@ -1,6 +1,8 @@
 #include "Client.h"
 
-void error_display(const char* msg, int err_no)
+HWND g_hWnd;
+
+void error_display(LPCWSTR msg, int err_no)
 {
     WCHAR* lpMsgBuf;
     FormatMessage(
@@ -9,10 +11,49 @@ void error_display(const char* msg, int err_no)
         NULL, err_no,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL);
-    std::cout << msg;
-    std::wcout << L" 에러 " << lpMsgBuf << std::endl;
+    MessageBox(g_hWnd, lpMsgBuf, msg, 0);
     while (true); // 디버깅용
     LocalFree(lpMsgBuf);
+}
+
+void CALLBACK recv_callback(DWORD er, DWORD recv_size, LPWSAOVERLAPPED pwsaover, DWORD recv_flag)
+{
+    int res;
+
+    res = WSARecv(g_client_s.GetSock(), &g_client_s.GetWSABuf(), 2, nullptr, &recv_flag, pwsaover, recv_callback);
+    if (0 != res) {
+        int err_no = WSAGetLastError();
+        if (WSA_IO_PENDING != err_no) {
+            error_display(L"WSARecv", WSAGetLastError());
+            closesocket(g_client_s.GetSock());
+        }
+    }
+    
+    g_x = *reinterpret_cast<int*>(&g_client_s.buf[0]);
+    g_x = *reinterpret_cast<int*>(&g_client_s.buf[4]);
+    
+}
+
+void do_recv()
+{
+    int res;
+
+    DWORD recv_flag = 0;
+
+    g_client_s.SetRecv();
+
+    res = WSARecv(g_client_s.GetSock(), &g_client_s.GetWSABuf(), 2, 0, &recv_flag, &g_client_s.GetOver(), recv_callback);
+    if (0 != res) {
+        int err_no = WSAGetLastError();
+            if (WSA_IO_PENDING != err_no) {
+                error_display(L"WSARecv", WSAGetLastError());
+                closesocket(g_client_s.GetSock());
+        }
+    }
+
+    g_x = *reinterpret_cast<int*>(&g_client_s.buf[0]);
+    g_x = *reinterpret_cast<int*>(&g_client_s.buf[4]);
+
 }
 
 Client::Client()
@@ -20,14 +61,14 @@ Client::Client()
     std::wcout.imbue(std::locale("korean"));
 
     if (WSAStartup(MAKEWORD(2, 2), &m_wsa) != 0) {
-        error_display("WSAStartup", WSAGetLastError());
+        error_display(L"WSAStartup", WSAGetLastError());
         closesocket(m_server_socket);
     }
 
-    m_server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, 0);
+    m_server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 
     if (m_server_socket == INVALID_SOCKET) {
-        error_display("WSASocket", WSAGetLastError());
+        error_display(L"WSASocket", WSAGetLastError());
         closesocket(m_server_socket);
     }
 
@@ -38,52 +79,90 @@ Client::Client()
 
 bool Client::Init()
 {
-    return SOCKET_ERROR != connect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), sizeof(m_server_addr));
+    if (SOCKET_ERROR == connect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), sizeof(m_server_addr))) {
+        return false;
+    }
+    do_recv();
+
+    return true;
 }
 
-DWORD Client::Send(PacketType pt, void* packet)
+void Client::Send(PacketType pt, void* packet)
 {
-    DWORD send_byte;
     wsabuf[0].buf = reinterpret_cast<char*>(&pt);
     wsabuf[0].len = sizeof(pt);
     wsabuf[1].buf = reinterpret_cast<char*>(packet);
     wsabuf[1].len = packet_size[pt];
 
-    int res = WSASend(m_server_socket, wsabuf, 2, &send_byte, 0, 0, 0);
+    DWORD send_byte;
+
+    int res = WSASend(m_server_socket, wsabuf, 2, &send_byte, 0, nullptr, nullptr);
 
     if (0 != res) {
-        error_display("WSASend", WSAGetLastError());
+        error_display(L"WSASend", WSAGetLastError());
         closesocket(m_server_socket);
     }
 
-	return send_byte;
 }
 
-PacketType Client::Recv()
+void Client::SetRecv()
 {
-    PacketType pt{};
+    ZeroMemory(&pt, sizeof(pt));
+    ZeroMemory(&m_wsaover, sizeof(m_wsaover));
+
     wsabuf[0].buf = reinterpret_cast<char*>(&pt);
     wsabuf[0].len = sizeof(pt);
-
-    DWORD recv_flag = 0;
-    DWORD recv_byte;
-
-	int res = WSARecv(m_server_socket, &wsabuf[0], 1, &recv_byte, &recv_flag, nullptr, nullptr);
-    if (0 != res) {
-        error_display("WSARecv", WSAGetLastError());
-        closesocket(m_server_socket);
-    }
 
     wsabuf[1].buf = buf;
     wsabuf[1].len = packet_size[pt];
 
-    res = WSARecv(m_server_socket, &wsabuf[1], 1, &recv_byte, &recv_flag, nullptr, nullptr);
-    if (0 != res) {
-        error_display("WSARecv", WSAGetLastError());
-        closesocket(m_server_socket);
+    m_wsaover.hEvent = WSACreateEvent();
+}
+
+errno_t Client::KeyProcess(WPARAM& wParam)
+{
+    PacketType packet_type;
+    packet_type = KeyInput;
+    PacketKeyInput ki;
+
+    switch (wParam)
+    {
+    case VK_LEFT:
+        ki.key = VK_LEFT;
+        break;
+    case VK_RIGHT:
+        ki.key = VK_RIGHT;
+        break;
+    case VK_UP:
+        ki.key = VK_UP;
+        break;
+    case VK_DOWN:
+        ki.key = VK_DOWN;
+        break;
+    case VK_ESCAPE:
+        return 1;
+    default:
+        return -1;
     }
 
-    return pt;
+    g_client_s.Send(packet_type, (void*)&ki);
+
+    return 0;
+}
+
+SOCKET& Client::GetSock()
+{
+    return m_server_socket;
+}
+
+WSAOVERLAPPED& Client::GetOver()
+{
+    return m_wsaover;
+}
+
+WSABUF& Client::GetWSABuf()
+{
+    return wsabuf[0];
 }
 
 Client::~Client()

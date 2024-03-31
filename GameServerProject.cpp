@@ -1,18 +1,21 @@
 ﻿#include "stdafx.h"
 #include "King.h"
 #include "ChessBoard.h"
+//#include "ObjectManager.h"
 #include "Client.h"
 
 #define MAX_LOADSTRING 100
 
+extern HWND g_hWnd;
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
-
-Client client_s;
 RECT clientrect;
 int width, height;
+
+Client g_client_s;
+int g_x{}, g_y{};
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -80,11 +83,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, (HMENU)NULL, hInstance, NULL);
     
-    if (!client_s.Init()) {
+    g_hWnd = hWnd;
+
+    if (!g_client_s.Init()) {
         MessageBox(hWnd, L"CANNOT CONNECT SERVER", L"CONNECT ERROR", 0);
         exit(1);
     }
-    
+
     if (GetClientRect(hWnd, &clientrect)) {
         width = clientrect.right - clientrect.left;
         height = clientrect.bottom - clientrect.top;
@@ -96,7 +101,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     windowsize.width = width;
     windowsize.height = height;
     
-    client_s.Send(packet, (void*)&windowsize);
+    g_client_s.Send(packet, (void*)&windowsize);
 
     if (!hWnd)
     {
@@ -115,14 +120,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static HDC hdc;
     static ChessBoard chessboard;
     static King king;
-    
-    RECT rect;
+    //static ObjectManager object_manager;
 
     static HDC hdcBuffer; // 백 버퍼용 HDC
     static HBITMAP hBitmap;
     static HBITMAP hOldBitmap;
-
-    static int x, y;
 
     switch (message)
     {
@@ -137,55 +139,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         chessboard.Init();
         king.Init();
         break;
+
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            hdc = BeginPaint(hWnd, &ps);
+        
+        PAINTSTRUCT ps;
+        hdc = BeginPaint(hWnd, &ps);
 
-            king.Update(x, y);
-            chessboard.Render(hdcBuffer);
-            king.Render(hdcBuffer);
+        king.Update(g_x, g_y);
+        king.Render(hdcBuffer);
+        chessboard.Render(hdcBuffer);
+        //object_manager.Render(hdcBuffer);
 
-             //백 버퍼 내용을 화면에 복사
-            BitBlt(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY);
+        //백 버퍼 내용을 화면에 복사
+        BitBlt(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY);
 
-            EndPaint(hWnd, &ps);
-        }
+        EndPaint(hWnd, &ps);
+        
         break;
     case WM_KEYDOWN:
-        PacketType packet_type;
-        packet_type = KeyInput;
-        PacketKeyInput ki;
 
-        switch (wParam)
+        int return_value;
+        return_value = g_client_s.KeyProcess(wParam);
+
+        switch (return_value)
         {
-            case VK_LEFT:
-                ki.key = VK_LEFT;
-                break;
-            case VK_RIGHT:
-                ki.key = VK_RIGHT;
-                break;
-            case VK_UP:
-                ki.key = VK_UP;
-                break;
-            case VK_DOWN:
-                ki.key = VK_DOWN;
-                break;
-            case VK_ESCAPE:
-                //메모리 해제
-                SelectObject(hdcBuffer, hOldBitmap);
-                DeleteObject(hBitmap);
-                DeleteDC(hdcBuffer);
+        case 1:
+            //메모리 해제
+            SelectObject(hdcBuffer, hOldBitmap);
+            DeleteObject(hBitmap);
+            DeleteDC(hdcBuffer);
 
-                ReleaseDC(hWnd, hdc);
-                PostQuitMessage(0);
-                break;
+            ReleaseDC(hWnd, hdc);
+            PostQuitMessage(0);
+            break;
+        case -1:
+            return 0;
         }
-        client_s.Send(packet_type, (void*)&ki);
-        client_s.Recv();
-
-        x = *reinterpret_cast<int*>(&client_s.buf[0]);
-        y = *reinterpret_cast<int*>(&client_s.buf[4]);
 
         InvalidateRect(hWnd, NULL, FALSE);
         break;
@@ -201,5 +190,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
+
     return 0;
 }

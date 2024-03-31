@@ -3,8 +3,9 @@
 
 class King {
 private:
-    CImage king;
-    Pos pos;
+    int m_id;
+    CImage m_king;
+    Pos m_pos;
 
 public:
     King(){}
@@ -13,7 +14,7 @@ public:
     void Init();
     void Render(HDC);
     void Update(int, int);
-    //void Move(int dx, int dy);
+    void SetId(int);
+    int GetId() const;
 
-    
 };
