@@ -1,6 +1,7 @@
 #include "Client.h"
 
 HWND g_hWnd;
+
 void CALLBACK recv_callback(DWORD, DWORD, LPWSAOVERLAPPED, DWORD);
 void CALLBACK send_callback(DWORD, DWORD, LPWSAOVERLAPPED, DWORD);
 
@@ -18,25 +19,6 @@ void error_display(LPCWSTR msg, int err_no)
     LocalFree(lpMsgBuf);
 }
 
-void do_recv()
-{
-    int res;
-
-    DWORD recv_flag = 0;
-
-    g_client_s.SetRecv();
-
-    res = WSARecv(g_client_s.GetSock(), &g_client_s.GetWSABuf(), 2, 0, &recv_flag, &g_client_s.GetOver(), recv_callback);
-    if (0 != res) {
-        int err_no = WSAGetLastError();
-        if (WSA_IO_PENDING != err_no) {
-            error_display(L"WSARecv", WSAGetLastError());
-            closesocket(g_client_s.GetSock());
-        }
-    }
-
-}
-
 void CALLBACK send_callback(DWORD er, DWORD send_size, LPWSAOVERLAPPED pwsaover, DWORD send_flag)
 {
     int res;
@@ -50,6 +32,7 @@ void CALLBACK send_callback(DWORD er, DWORD send_size, LPWSAOVERLAPPED pwsaover,
             closesocket(g_client_s.GetSock());
         }
     }
+    SleepEx(1, TRUE);
 }
 
 void CALLBACK recv_callback(DWORD er, DWORD recv_size, LPWSAOVERLAPPED pwsaover, DWORD recv_flag)
@@ -69,7 +52,7 @@ Client::Client()
 {
     std::wcout.imbue(std::locale("korean"));
 
-    if (WSAStartup(MAKEWORD(2, 2), &m_wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 0), &m_wsa) != 0) {
         error_display(L"WSAStartup", WSAGetLastError());
         closesocket(m_server_socket);
     }
@@ -91,6 +74,7 @@ bool Client::Init()
     if (SOCKET_ERROR == connect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), sizeof(m_server_addr))) {
         return false;
     }
+
     return true;
 }
 
@@ -106,7 +90,7 @@ void Client::Send(PacketType pt, void* packet)
         error_display(L"WSASend", WSAGetLastError());
         closesocket(m_server_socket);
     }
-
+    SleepEx(0, TRUE);
 }
 
 void Client::SetRecv()
@@ -120,7 +104,6 @@ void Client::SetRecv()
     wsabuf[1].buf = buf;
     wsabuf[1].len = packet_size[pt];
 
-    m_wsaover.hEvent = WSACreateEvent();
 }
 
 errno_t Client::KeyProcess(WPARAM& wParam)

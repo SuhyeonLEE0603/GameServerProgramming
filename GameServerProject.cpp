@@ -1,12 +1,13 @@
 ﻿#include "stdafx.h"
 #include "King.h"
 #include "ChessBoard.h"
-//#include "ObjectManager.h"
 #include "Client.h"
 
 #define MAX_LOADSTRING 100
 
 extern HWND g_hWnd;
+HDC g_hdc;
+
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
@@ -17,6 +18,12 @@ int width, height;
 Client g_client_s;
 char g_id{};
 int g_x{}, g_y{};
+ChessBoard chessboard;
+King king;
+
+HDC hdcBuffer; // 백 버퍼용 HDC
+HBITMAP hBitmap;
+HBITMAP hOldBitmap;
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -119,50 +126,49 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static HDC hdc;
-    static ChessBoard chessboard;
-    static King king;
-
-    static HDC hdcBuffer; // 백 버퍼용 HDC
-    static HBITMAP hBitmap;
-    static HBITMAP hOldBitmap;
+    static HFONT hFont;
+    static HFONT hOldFont;
 
     switch (message)
     {
     case WM_CREATE:
-        hdc = GetDC(hWnd);
+        g_hdc = GetDC(hWnd);
 
          //백 버퍼 생성
-        hdcBuffer = CreateCompatibleDC(hdc);
-        hBitmap = CreateCompatibleBitmap(hdc, WINDOW_WIDTH, WINDOW_HEIGHT);
+        hdcBuffer = CreateCompatibleDC(g_hdc);
+        hBitmap = CreateCompatibleBitmap(g_hdc, WINDOW_WIDTH, WINDOW_HEIGHT);
         hOldBitmap = (HBITMAP)SelectObject(hdcBuffer, hBitmap);
+
+        // 폰트 생성
+        hFont = CreateFont(30, 10, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+            ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            DEFAULT_QUALITY, DEFAULT_PITCH, L"Arial");
+        // 생성된 폰트를 DC에 선택
+        hOldFont = (HFONT)SelectObject(hdcBuffer, hFont);
 
         chessboard.Init();
         king.Init();
         break;
 
     case WM_PAINT:
-        
+        {
         PAINTSTRUCT ps;
-        hdc = BeginPaint(hWnd, &ps);
+        g_hdc = BeginPaint(hWnd, &ps);
 
         king.Update(g_x, g_y);
         chessboard.Render(hdcBuffer);
         king.Render(hdcBuffer);
-        //object_manager.Render(hdcBuffer);
 
         //백 버퍼 내용을 화면에 복사
-        BitBlt(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY);
+        BitBlt(g_hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY);
 
         EndPaint(hWnd, &ps);
-        
+        }
         break;
     case WM_KEYDOWN:
 
         int return_value;
         return_value = g_client_s.KeyProcess(wParam);
-
-        SleepEx(0, TRUE);
 
         switch (return_value)
         {
@@ -172,7 +178,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DeleteObject(hBitmap);
             DeleteDC(hdcBuffer);
 
-            ReleaseDC(hWnd, hdc);
+            ReleaseDC(hWnd, g_hdc);
             PostQuitMessage(0);
             break;
         case -1:
@@ -187,7 +193,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         DeleteObject(hBitmap);
         DeleteDC(hdcBuffer);
 
-        ReleaseDC(hWnd, hdc);
+        ReleaseDC(hWnd, g_hdc);
         PostQuitMessage(0);
         break;
     default:

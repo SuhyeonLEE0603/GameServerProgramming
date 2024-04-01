@@ -21,7 +21,7 @@ Server::Server()
 
     std::wcout.imbue(std::locale("korean"));
 
-    if (WSAStartup(MAKEWORD(2, 2), &m_wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 0), &m_wsa) != 0) {
         error_display("WSAStartup", WSAGetLastError());
         closesocket(m_client_socket);
     }
