@@ -14,12 +14,12 @@ struct PacketWindowSize {
 };
 
 struct PacketKeyInput {
-	char id;
+	//char id;
 	char key;
 };
 
 struct PacketPos {
-	char id;
+	//char id;
 	int pos_x;
 	int pos_y;
 };

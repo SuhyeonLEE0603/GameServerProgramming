@@ -17,6 +17,7 @@ public:
 	SOCKET& GetSock();
 	WSAOVERLAPPED& GetOver();
 	WSABUF& GetWSABuf();
+	PacketType GetPacketType() const;
 	~Client();
 
 	char buf[BUFSIZE];
@@ -34,3 +35,4 @@ private:
 
 extern Client g_client_s;
 extern int g_x, g_y;
+extern char g_id;

@@ -15,6 +15,7 @@ RECT clientrect;
 int width, height;
 
 Client g_client_s;
+char g_id{};
 int g_x{}, g_y{};
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -45,6 +46,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     while (GetMessage(&msg, nullptr, 0, 0))
     {
+
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
         {
             TranslateMessage(&msg);
@@ -120,7 +122,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static HDC hdc;
     static ChessBoard chessboard;
     static King king;
-    //static ObjectManager object_manager;
 
     static HDC hdcBuffer; // 백 버퍼용 HDC
     static HBITMAP hBitmap;
@@ -146,8 +147,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hdc = BeginPaint(hWnd, &ps);
 
         king.Update(g_x, g_y);
-        king.Render(hdcBuffer);
         chessboard.Render(hdcBuffer);
+        king.Render(hdcBuffer);
         //object_manager.Render(hdcBuffer);
 
         //백 버퍼 내용을 화면에 복사
@@ -160,6 +161,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         int return_value;
         return_value = g_client_s.KeyProcess(wParam);
+
+        SleepEx(0, TRUE);
 
         switch (return_value)
         {

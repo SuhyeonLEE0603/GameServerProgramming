@@ -1,6 +1,8 @@
 #include "Client.h"
 
 HWND g_hWnd;
+void CALLBACK recv_callback(DWORD, DWORD, LPWSAOVERLAPPED, DWORD);
+void CALLBACK send_callback(DWORD, DWORD, LPWSAOVERLAPPED, DWORD);
 
 void error_display(LPCWSTR msg, int err_no)
 {
@@ -16,24 +18,6 @@ void error_display(LPCWSTR msg, int err_no)
     LocalFree(lpMsgBuf);
 }
 
-void CALLBACK recv_callback(DWORD er, DWORD recv_size, LPWSAOVERLAPPED pwsaover, DWORD recv_flag)
-{
-    int res;
-
-    res = WSARecv(g_client_s.GetSock(), &g_client_s.GetWSABuf(), 2, nullptr, &recv_flag, pwsaover, recv_callback);
-    if (0 != res) {
-        int err_no = WSAGetLastError();
-        if (WSA_IO_PENDING != err_no) {
-            error_display(L"WSARecv", WSAGetLastError());
-            closesocket(g_client_s.GetSock());
-        }
-    }
-    
-    g_x = *reinterpret_cast<int*>(&g_client_s.buf[0]);
-    g_x = *reinterpret_cast<int*>(&g_client_s.buf[4]);
-    
-}
-
 void do_recv()
 {
     int res;
@@ -45,14 +29,39 @@ void do_recv()
     res = WSARecv(g_client_s.GetSock(), &g_client_s.GetWSABuf(), 2, 0, &recv_flag, &g_client_s.GetOver(), recv_callback);
     if (0 != res) {
         int err_no = WSAGetLastError();
-            if (WSA_IO_PENDING != err_no) {
-                error_display(L"WSARecv", WSAGetLastError());
-                closesocket(g_client_s.GetSock());
+        if (WSA_IO_PENDING != err_no) {
+            error_display(L"WSARecv", WSAGetLastError());
+            closesocket(g_client_s.GetSock());
         }
     }
 
-    g_x = *reinterpret_cast<int*>(&g_client_s.buf[0]);
-    g_x = *reinterpret_cast<int*>(&g_client_s.buf[4]);
+}
+
+void CALLBACK send_callback(DWORD er, DWORD send_size, LPWSAOVERLAPPED pwsaover, DWORD send_flag)
+{
+    int res;
+    g_client_s.SetRecv();
+
+    res = WSARecv(g_client_s.GetSock(), &g_client_s.GetWSABuf(), 2, nullptr, &send_flag, pwsaover, recv_callback);
+    if (0 != res) {
+        int err_no = WSAGetLastError();
+        if (WSA_IO_PENDING != err_no) {
+            error_display(L"WSARecv", WSAGetLastError());
+            closesocket(g_client_s.GetSock());
+        }
+    }
+}
+
+void CALLBACK recv_callback(DWORD er, DWORD recv_size, LPWSAOVERLAPPED pwsaover, DWORD recv_flag)
+{
+    switch (g_client_s.GetPacketType()) 
+    {
+    case PlayerPos:
+        //g_id = (int)g_client_s.buf[0];
+        g_x = *reinterpret_cast<int*>(&g_client_s.buf[0]);
+        g_y = *reinterpret_cast<int*>(&g_client_s.buf[4]);
+        break;
+    }
 
 }
 
@@ -82,8 +91,6 @@ bool Client::Init()
     if (SOCKET_ERROR == connect(m_server_socket, reinterpret_cast<sockaddr*>(&m_server_addr), sizeof(m_server_addr))) {
         return false;
     }
-    do_recv();
-
     return true;
 }
 
@@ -94,10 +101,7 @@ void Client::Send(PacketType pt, void* packet)
     wsabuf[1].buf = reinterpret_cast<char*>(packet);
     wsabuf[1].len = packet_size[pt];
 
-    DWORD send_byte;
-
-    int res = WSASend(m_server_socket, wsabuf, 2, &send_byte, 0, nullptr, nullptr);
-
+    int res = WSASend(m_server_socket, wsabuf, 2, nullptr, 0, &m_wsaover, send_callback);
     if (0 != res) {
         error_display(L"WSASend", WSAGetLastError());
         closesocket(m_server_socket);
@@ -146,7 +150,7 @@ errno_t Client::KeyProcess(WPARAM& wParam)
     }
 
     g_client_s.Send(packet_type, (void*)&ki);
-
+    
     return 0;
 }
 
@@ -163,6 +167,11 @@ WSAOVERLAPPED& Client::GetOver()
 WSABUF& Client::GetWSABuf()
 {
     return wsabuf[0];
+}
+
+PacketType Client::GetPacketType() const
+{
+    return pt;
 }
 
 Client::~Client()
