@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Packet.h"
+#include "King.h"
 
 constexpr short PORT = 4000;
 constexpr int BUFSIZE = 256;
@@ -12,7 +13,8 @@ public:
 	Client();
 	bool Init();
 	void Send(PacketType pt, void* packet);
-	void SetRecv();
+	void SetWSABuf1();
+	void SetWSABuf2();
 	errno_t KeyProcess(WPARAM&);
 	SOCKET& GetSock();
 	WSAOVERLAPPED& GetOver();
@@ -21,12 +23,12 @@ public:
 	~Client();
 
 	char buf[BUFSIZE];
+	WSABUF wsabuf[2];
 
 private:
 	PacketType pt{};
 
 	WSAOVERLAPPED m_wsaover;
-	WSABUF wsabuf[2];
 	WSADATA m_wsa;
 	SOCKET m_server_socket;
 	SOCKADDR_IN m_server_addr;
@@ -34,5 +36,5 @@ private:
 };
 
 extern Client g_client_s;
-extern int g_x, g_y;
-extern char g_id;
+extern int g_x, g_y, g_id;
+extern King king;

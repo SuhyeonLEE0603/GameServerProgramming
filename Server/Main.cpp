@@ -14,6 +14,7 @@ int main()
 	
 	int x;
 	int y;
+	int id{};
 	int recv_size;
 
 	while (1) {
@@ -32,7 +33,9 @@ int main()
 		}
 		else if (server.pt == KeyInput) {
 			PacketKeyInput key;
-			key.key = server.buf[0];
+
+			key.id = id;
+			key.key = server.buf[4];
 
 			switch (key.key)
 			{
@@ -56,6 +59,7 @@ int main()
 			PacketType packet = PlayerPos;
 			PacketPos pos;
 
+			pos.id = id;
 			pos.pos_x = player.pos.x;
 			pos.pos_y = player.pos.y;
 

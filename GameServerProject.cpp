@@ -16,8 +16,7 @@ RECT clientrect;
 int width, height;
 
 Client g_client_s;
-char g_id{};
-int g_x{}, g_y{};
+int g_x{}, g_y{}, g_id{};
 ChessBoard chessboard;
 King king;
 
@@ -156,6 +155,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_hdc = BeginPaint(hWnd, &ps);
 
         king.Update(g_x, g_y);
+
         chessboard.Render(hdcBuffer);
         king.Render(hdcBuffer);
 

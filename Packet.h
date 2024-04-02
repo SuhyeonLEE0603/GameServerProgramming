@@ -4,7 +4,8 @@
 enum PacketType {
 	WindowSize,
 	KeyInput,
-	PlayerPos
+	PlayerPos,
+	Playerid
 };
 
 struct PacketWindowSize {
@@ -13,15 +14,17 @@ struct PacketWindowSize {
 };
 
 struct PacketKeyInput {
+	int id;
 	char key;
 };
 
 struct PacketPos {
+	int id;
 	int pos_x;
 	int pos_y;
 };
 
-static std::map<PacketType, size_t> packet_size{
+static std::map<PacketType, int> packet_size{
 	{WindowSize, sizeof(PacketWindowSize)},
 	{KeyInput, sizeof(PacketKeyInput)},
 	{PlayerPos, sizeof(PacketPos)}

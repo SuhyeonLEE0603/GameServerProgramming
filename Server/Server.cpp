@@ -88,21 +88,12 @@ DWORD Server::Recv()
 {
     wsabuf[0].buf = reinterpret_cast<char*>(&pt);
     wsabuf[0].len = sizeof(pt);
-
+    wsabuf[1].buf = buf;
+    wsabuf[1].len = packet_size[pt];
     DWORD recv_flag = 0;
     DWORD recv_byte;
 
-	int res = WSARecv(m_client_socket, &wsabuf[0], 1, &recv_byte, &recv_flag, nullptr, nullptr);
-    if (0 != res) {
-        error_display("WSARecv", WSAGetLastError());
-        closesocket(m_client_socket);
-    }
-
-    wsabuf[1].buf = buf;
-    wsabuf[1].len = packet_size[pt];
-
-
-    res = WSARecv(m_client_socket, &wsabuf[1], 1, &recv_byte, &recv_flag, nullptr, nullptr);
+	int res = WSARecv(m_client_socket, wsabuf, 2, &recv_byte, &recv_flag, nullptr, nullptr);
     if (0 != res) {
         error_display("WSARecv", WSAGetLastError());
         closesocket(m_client_socket);

@@ -1,6 +1,6 @@
 #pragma once
 #include "Headers.h"
-#include "Packet.h"
+#include "../Packet.h"
 
 constexpr short PORT = 4000;
 constexpr int BUFSIZE = 256;

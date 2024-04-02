@@ -22,9 +22,9 @@ void error_display(LPCWSTR msg, int err_no)
 void CALLBACK send_callback(DWORD er, DWORD send_size, LPWSAOVERLAPPED pwsaover, DWORD send_flag)
 {
     int res;
-    g_client_s.SetRecv();
 
-    res = WSARecv(g_client_s.GetSock(), &g_client_s.GetWSABuf(), 2, nullptr, &send_flag, pwsaover, recv_callback);
+    g_client_s.SetWSABuf1();
+    res = WSARecv(g_client_s.GetSock(), &g_client_s.wsabuf[0], 1, nullptr, &send_flag, pwsaover, recv_callback);
     if (0 != res) {
         int err_no = WSAGetLastError();
         if (WSA_IO_PENDING != err_no) {
@@ -32,6 +32,19 @@ void CALLBACK send_callback(DWORD er, DWORD send_size, LPWSAOVERLAPPED pwsaover,
             closesocket(g_client_s.GetSock());
         }
     }
+
+    SleepEx(1, TRUE);
+
+    g_client_s.SetWSABuf2();
+    res = WSARecv(g_client_s.GetSock(), &g_client_s.wsabuf[1], 1, nullptr, &send_flag, pwsaover, recv_callback);
+    if (0 != res) {
+        int err_no = WSAGetLastError();
+        if (WSA_IO_PENDING != err_no) {
+            error_display(L"WSARecv", WSAGetLastError());
+            closesocket(g_client_s.GetSock());
+        }
+    }
+
     SleepEx(1, TRUE);
 }
 
@@ -40,12 +53,14 @@ void CALLBACK recv_callback(DWORD er, DWORD recv_size, LPWSAOVERLAPPED pwsaover,
     switch (g_client_s.GetPacketType()) 
     {
     case PlayerPos:
-        //g_id = (int)g_client_s.buf[0];
-        g_x = *reinterpret_cast<int*>(&g_client_s.buf[0]);
-        g_y = *reinterpret_cast<int*>(&g_client_s.buf[4]);
+        g_id = *reinterpret_cast<int*>(&g_client_s.buf[0]);
+        g_x = *reinterpret_cast<int*>(&g_client_s.buf[4]);
+        g_y = *reinterpret_cast<int*>(&g_client_s.buf[8]);
         break;
     }
+    king.SetId(g_id);
 
+    SleepEx(1, TRUE);
 }
 
 Client::Client()
@@ -85,25 +100,28 @@ void Client::Send(PacketType pt, void* packet)
     wsabuf[1].buf = reinterpret_cast<char*>(packet);
     wsabuf[1].len = packet_size[pt];
 
+    ZeroMemory(&m_wsaover, sizeof(m_wsaover));
+
     int res = WSASend(m_server_socket, wsabuf, 2, nullptr, 0, &m_wsaover, send_callback);
     if (0 != res) {
         error_display(L"WSASend", WSAGetLastError());
         closesocket(m_server_socket);
     }
     SleepEx(0, TRUE);
+
 }
 
-void Client::SetRecv()
+void Client::SetWSABuf1()
 {
-    ZeroMemory(&pt, sizeof(pt));
-    ZeroMemory(&m_wsaover, sizeof(m_wsaover));
-
     wsabuf[0].buf = reinterpret_cast<char*>(&pt);
     wsabuf[0].len = sizeof(pt);
 
+}
+
+void Client::SetWSABuf2()
+{
     wsabuf[1].buf = buf;
     wsabuf[1].len = packet_size[pt];
-
 }
 
 errno_t Client::KeyProcess(WPARAM& wParam)
@@ -111,6 +129,7 @@ errno_t Client::KeyProcess(WPARAM& wParam)
     PacketType packet_type;
     packet_type = KeyInput;
     PacketKeyInput ki;
+    ki.id = 0;
 
     switch (wParam)
     {
@@ -133,7 +152,7 @@ errno_t Client::KeyProcess(WPARAM& wParam)
     }
 
     g_client_s.Send(packet_type, (void*)&ki);
-    
+
     return 0;
 }
 

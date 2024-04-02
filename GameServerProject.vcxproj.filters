@@ -41,11 +41,11 @@
     <ClInclude Include="ChessBoard.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Server\Packet.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Client.h">
       <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
