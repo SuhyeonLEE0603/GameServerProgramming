@@ -10,12 +10,16 @@ int main()
 	Player player;
 
 	server.Init();
-	server.Accept();
 	
 	int x;
 	int y;
 	int id{};
 	int recv_size;
+
+	for (int i = 1; ; ++i) {
+		clients_sockets.try_emplace(i, i, server.Accept());
+		clients_sockets[i].do_recv();
+	}
 
 	while (1) {
 

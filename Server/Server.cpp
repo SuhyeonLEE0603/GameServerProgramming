@@ -1,20 +1,5 @@
 #include "Server.h"
 
-void error_display(const char* msg, int err_no)
-{
-    WCHAR* lpMsgBuf;
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL, err_no,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL);
-    std::cout << msg;
-    std::wcout << L" 에러 " << lpMsgBuf << std::endl;
-    while (true); // 디버깅용
-    LocalFree(lpMsgBuf);
-}
-
 Server::Server()
 {
     m_player_num = 0;
@@ -26,7 +11,7 @@ Server::Server()
         closesocket(m_client_socket);
     }
 
-    m_server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, 0);
+    m_server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 
     if (m_server_socket == INVALID_SOCKET) {
         error_display("WSASocket", WSAGetLastError());
@@ -52,7 +37,7 @@ void Server::Init()
 
 }
 
-void Server::Accept()
+SOCKET& Server::Accept()
 {
     int addr_size = sizeof(m_server_addr);
 
@@ -63,7 +48,8 @@ void Server::Accept()
         closesocket(m_client_socket);
     }
     std::cout << "Client Accepted" << std::endl;
-    
+
+    return m_client_socket;
 }
 
 DWORD Server::Send(PacketType pt, void* packet)
@@ -102,9 +88,15 @@ DWORD Server::Recv()
     return recv_byte;
 }
 
+SOCKET& Server::GetClientSocket()
+{
+    return m_client_socket;
+}
+
 Server::~Server()
 {
     std::cout << "Server Close" << std::endl;
+    clients_sockets.clear();
     closesocket(m_server_socket);
     closesocket(m_client_socket);
     WSACleanup();

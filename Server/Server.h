@@ -1,5 +1,6 @@
 #pragma once
 #include "Headers.h"
+#include "Session.h"
 #include "../Packet.h"
 
 constexpr short PORT = 4000;
@@ -8,15 +9,15 @@ constexpr int BUFSIZE = 256;
 class Server
 {
 public:
-	//vector<SOCKET> m_clients_socket;
 	char buf[BUFSIZE];
 	PacketType pt{};
 
 	Server();
 	void Init();
-	void Accept();
+	SOCKET& Accept();
 	DWORD Send(PacketType pt, void* packet);
 	DWORD Recv();
+	SOCKET& GetClientSocket();
 	~Server();
 
 private:
@@ -30,3 +31,4 @@ private:
 
 };
 
+std::unordered_map<int, Session> clients_sockets;

@@ -35,6 +35,6 @@ private:
 
 };
 
-extern Client g_client_s;
-extern int g_x, g_y, g_id;
+Client g_client_s;
+int g_x, g_y, g_id;
 extern King king;

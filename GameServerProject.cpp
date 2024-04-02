@@ -15,8 +15,6 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름�
 RECT clientrect;
 int width, height;
 
-Client g_client_s;
-int g_x{}, g_y{}, g_id{};
 ChessBoard chessboard;
 King king;
 
@@ -155,7 +153,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_hdc = BeginPaint(hWnd, &ps);
 
         king.Update(g_x, g_y);
-
+        king.SetId(g_id);
         chessboard.Render(hdcBuffer);
         king.Render(hdcBuffer);
 
