@@ -2,8 +2,6 @@
 
 Server::Server()
 {
-    m_player_num = 0;
-
     std::wcout.imbue(std::locale("korean"));
 
     if (WSAStartup(MAKEWORD(2, 0), &m_wsa) != 0) {
@@ -49,47 +47,6 @@ SOCKET& Server::Accept()
     }
     std::cout << "Client Accepted" << std::endl;
 
-    return m_client_socket;
-}
-
-DWORD Server::Send(PacketType pt, void* packet)
-{
-    DWORD send_byte;
-    wsabuf[0].buf = reinterpret_cast<char*>(&pt);
-    wsabuf[0].len = sizeof(pt);
-    wsabuf[1].buf = reinterpret_cast<char*>(packet);
-    wsabuf[1].len = packet_size[pt];
-
-    int res = WSASend(m_client_socket, wsabuf, 2, &send_byte, 0, 0, 0);
-    
-    if (0 != res) {
-        error_display("WSASend", WSAGetLastError());
-        closesocket(m_client_socket);
-    }
-
-	return send_byte;
-}
-
-DWORD Server::Recv()
-{
-    wsabuf[0].buf = reinterpret_cast<char*>(&pt);
-    wsabuf[0].len = sizeof(pt);
-    wsabuf[1].buf = buf;
-    wsabuf[1].len = packet_size[pt];
-    DWORD recv_flag = 0;
-    DWORD recv_byte;
-
-	int res = WSARecv(m_client_socket, wsabuf, 2, &recv_byte, &recv_flag, nullptr, nullptr);
-    if (0 != res) {
-        error_display("WSARecv", WSAGetLastError());
-        closesocket(m_client_socket);
-    }
-
-    return recv_byte;
-}
-
-SOCKET& Server::GetClientSocket()
-{
     return m_client_socket;
 }
 

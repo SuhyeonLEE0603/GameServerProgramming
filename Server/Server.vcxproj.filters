@@ -41,5 +41,8 @@
     <ClInclude Include="Session.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="Headers.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

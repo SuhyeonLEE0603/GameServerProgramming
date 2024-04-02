@@ -135,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Packet.h" />
+    <ClInclude Include="Headers.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Session.h" />
