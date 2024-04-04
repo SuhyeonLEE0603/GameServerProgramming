@@ -152,8 +152,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         PAINTSTRUCT ps;
         g_hdc = BeginPaint(hWnd, &ps);
 
-        king.Update(g_x, g_y);
-        king.SetId(g_id);
+        king.Update(g_client_s.g_x, g_client_s.g_y);
+        king.SetId(g_client_s.g_id);
         chessboard.Render(hdcBuffer);
         king.Render(hdcBuffer);
 

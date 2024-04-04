@@ -25,6 +25,8 @@ public:
 	char buf[BUFSIZE];
 	WSABUF wsabuf[2];
 
+	int g_x, g_y, g_id;
+
 private:
 	PacketType pt{};
 
@@ -36,5 +38,4 @@ private:
 };
 
 Client g_client_s;
-int g_x, g_y, g_id;
 extern King king;

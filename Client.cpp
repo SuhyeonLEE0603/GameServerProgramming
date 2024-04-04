@@ -53,12 +53,12 @@ void CALLBACK recv_callback(DWORD er, DWORD recv_size, LPWSAOVERLAPPED pwsaover,
     switch (g_client_s.GetPacketType()) 
     {
     case PlayerPos:
-        g_id = *reinterpret_cast<int*>(&g_client_s.buf[0]);
-        g_x = *reinterpret_cast<int*>(&g_client_s.buf[4]);
-        g_y = *reinterpret_cast<int*>(&g_client_s.buf[8]);
+        g_client_s.g_id = *reinterpret_cast<int*>(&g_client_s.buf[0]);
+        g_client_s.g_x = *reinterpret_cast<int*>(&g_client_s.buf[4]);
+        g_client_s.g_y = *reinterpret_cast<int*>(&g_client_s.buf[8]);
         break;
     }
-    king.SetId(g_id);
+    king.SetId(g_client_s.g_id);
 
     SleepEx(1, TRUE);
 }
